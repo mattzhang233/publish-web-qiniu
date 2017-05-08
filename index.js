@@ -9,4 +9,8 @@ config.then(function (data) {
   console.error(data)
 },function (err) {
   log(err,'error');
+}).then(function () {
+  
+},function () {
+  
 });
