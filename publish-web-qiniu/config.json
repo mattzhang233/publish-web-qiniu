@@ -1,0 +1,5 @@
+{
+  "uploadPath": "./publish-web-qiniu",
+  "webPath": "./publish-web-qiniu",
+  "replaceReg": ""
+}

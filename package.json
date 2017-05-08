@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "colors": "^1.1.2",
+    "moment": "^2.18.1",
+    "promise": "^7.1.1",
+    "qiniu": "^6.1.13",
+    "yargs": "^8.0.1"
+  }
+}
