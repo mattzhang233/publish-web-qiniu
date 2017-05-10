@@ -1,18 +1,19 @@
-
 var argv = require('yargs').argv;
 
-var config = require('./lib/config')();
+var config = require('./lib/config')
 var log = require('./lib/log')
 var upload = require('./lib/upload')
+var replace = require('./lib/replace')
 
-//读取设置
-config
+config()
   .then(function (data) {
     return upload(data);
   }, handleError)
-  .then(function () {
-
-  }, handleError);
+  .then(function (config,files) {
+    return replace(config,files);
+  }, handleError).then(function () {
+  console.log('finish')
+},handleError);
 
 
 function handleError(message) {
