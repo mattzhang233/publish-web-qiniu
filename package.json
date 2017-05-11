@@ -1,15 +1,11 @@
 {
   "dependencies": {
-    "charenc": "^0.0.2",
     "colors": "^1.1.2",
-    "crypt": "^0.0.2",
-    "glob": "^7.1.1",
-    "is-buffer": "^1.1.5",
+    "is-array": "^1.0.1",
     "is-object": "^1.0.1",
-    "md5": "^2.2.1",
+    "is-string": "^1.0.4",
+    "map-stream": "^0.0.7",
     "moment": "^2.18.1",
-    "promise": "^7.1.1",
-    "qiniu": "^6.1.13",
-    "yargs": "^8.0.1"
+    "vinyl-fs": "^2.4.4"
   }
 }
