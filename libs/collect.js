@@ -1,34 +1,39 @@
 var vfs = require('vinyl-fs');
 var mapStream = require('map-stream');
+var Promise = require('promise')
 
 function main(config) {
-  vfs.src(srcs, {
-    nodir: true
-  })
-    .pipe(mapStream(function (file, cb) {
-      var content = file.contents.toString().replace(options.reg, function (words, pattern) {
-        path = options.handlePath ? options.handlePath(pattern) : pattern;
-        try {
-          if (!cache[path]) {
-            md5Value = md5(fs.readFileSync(path).toString());
+  var uploadFiles = {};
+  var replaceFiles = [];
 
-            cache[path] = options.handleRev ? options.handleRev(path, md5Value) : path + '?rev=' + md5Value;
+  return new Promise(function (resolve, reject) {
+    vfs
+      .src(config.path, {
+        nodir: true
+      })
+      .pipe(mapStream(function (file, cb) {
+        var result;
+        var lastIndex = replaceFiles.length - 1;
+        var content = file.contents.toString();
+
+        while (config.uploadReg.exec(content) !== null) {
+          result = RegExp.$1;
+
+          if (replaceFiles[lastIndex] !== result) {
+            replaceFiles.push(file.path);
           }
-
-          pattern = cache[path];
+          uploadFiles[result] = true;
         }
-        catch (e) {
-          gutil.log("Can't solve the version control-" + path);
-        }
-        return pattern;
-      });
 
-      file.contents = new Buffer(content);
-
-      this.push(file);
-
-      cb();
-    }))
+        cb();
+      }))
+      .on('end', function () {
+        resolve({
+          'uploadFiles':uploadFiles,
+          'replaceFiles':replaceFiles
+        });
+      })
+  });
 }
 module.exports = main;
 
