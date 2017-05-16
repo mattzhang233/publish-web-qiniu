@@ -11,9 +11,11 @@ function plugin(config) {
   config.path = unit.handleSrc(config.path);
 
   collect(config).then(function (data) {
-    return upload(data)
+    return upload(config,data)
   }).then(function (data) {
     return replace(data);
+  },function (message) {
+    unit.log(message,'error');
   }).then(function () {
     console.log(123123)
   });
