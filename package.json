@@ -5,7 +5,10 @@
     "is-object": "^1.0.1",
     "is-string": "^1.0.4",
     "map-stream": "^0.0.7",
+    "md5": "^2.2.1",
     "moment": "^2.18.1",
+    "promise": "^7.1.1",
+    "qiniu": "^6.1.13",
     "vinyl-fs": "^2.4.4"
   }
 }
