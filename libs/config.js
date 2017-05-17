@@ -1,12 +1,12 @@
 var DEFAULT_CONFIG = {
-  webRoot: './web',
-  webGlobs: ['./web/**/*'],
+  webRoot: null,
+  webGlobs: null,
   uploadReg: /(?:href=|src=|url\()['|"]([^\s>"']+?)['|"]/gi,
 
-  qiniuAccess: 'upwff5gK6eYd52avUyB15h4J9CQV9csJHKSrqJQc',
-  qiniuSecret: 'R1dHlg1lLlx1ucsl8DfHvyWjYOGiYpGMTBw1CcMa',
-  qiniuBucket: 'test',
-  qiniuBucketDomain: 'opojd4psd.bkt.clouddn.com/'
+  qiniuAccess: null,
+  qiniuSecret: null,
+  qiniuBucket: null,
+  qiniuBucketDomain: null
 };
 
 var Promise = require('promise');

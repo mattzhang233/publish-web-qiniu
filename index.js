@@ -25,5 +25,4 @@ function plugin(config) {
     console.log('完成');
   }, handleError);
 }
-plugin();
 module.exports = plugin;
