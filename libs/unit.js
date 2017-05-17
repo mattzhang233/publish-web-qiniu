@@ -39,24 +39,23 @@ function writeUploaded() {
 }
 function readUploaded(dir) {
   var uploadPath = path.resolve(dir, './.publish-web-qiniu/uploaded.json');
-  var Uploaded = {};
+  var uploaded = {};
 
   return new Promise(function (resolve, reject) {
-    fs.readFile(uploadPath, function (err, buf) {
+    fs.readFile(uploadPath, function (err, data) {
       var temp;
       if (!err) {
         try {
-          temp = JSON.parse(buf);
+          temp = JSON.parse(data);
 
           if (isObject(temp)) {
-            Uploaded = temp;
+            uploaded = temp;
           }
         }
         catch (e) {
         }
       }
-
-      resolve(Uploaded);
+      resolve(uploaded);
     });
   });
 }

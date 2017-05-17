@@ -18,10 +18,7 @@ function main(config) {
     for (var key in DEFAULT_CONFIG) {
       if (DEFAULT_CONFIG.hasOwnProperty(key)) {
         if (!config[key]) {
-          reject([
-            'CONFIG ERROR',
-            'config.' + key + ' is a required'
-          ]);
+          reject('config.' + key + ' is a required');
           return;
         }
       }

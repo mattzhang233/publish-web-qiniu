@@ -4,24 +4,25 @@ var collect = require('./libs/collect')
 var upload = require('./libs/upload')
 var replace = require('./libs/replace')
 
-function handleError(data) {
-  var errorModule = data[0];
-  var errorMessage = data[1];
+function handleError(errorMessage) {
 
-  unit.log(errorModule +' : '+ errorMessage, 'error');
+  unit.log(errorMessage, 'error');
 }
 function plugin(config) {
-  var uploadFiles, replaceFiles;
+  var uploadKeys, replaceFiles;
 
-  conf(config).then(collect).then(function (data) {
-    replaceFiles = data.replaceFiles;
-    uploadFiles = data.uploadFiles;
+  conf(config).then(function (data) {
+    config = data;
 
-    return upload(config, uploadFiles)
+    return collect(config);
   }).then(function (data) {
-    uploadFiles = data;
+    replaceFiles = data.replaceFiles;
 
-    return replace(config, replaceFiles, uploadFiles);
+    return upload(config, data.uploadFiles)
+  }).then(function (data) {
+    uploadKeys = data;
+
+    return replace(config, replaceFiles, uploadKeys);
   }).then(function () {
     console.log(123123)
   }, handleError);

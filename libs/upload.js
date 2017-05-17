@@ -1,10 +1,10 @@
-var Promise = require('promise')
-var fs = require('fs')
-var md5 = require('md5')
-var qiniu = require('qiniu')
-var path = require('path')
+var Promise = require('promise');
+var fs = require('fs');
+var md5 = require('md5');
+var qiniu = require('qiniu');
+var path = require('path');
 
-var unit = require('./unit')
+var unit = require('./unit');
 
 function getFileKeys(config, files) {
   var fileKeys = {};
@@ -17,26 +17,20 @@ function getFileKeys(config, files) {
   }
 
   return new Promise(function (resolve, reject) {
-    var len = 0;
-    for (var key in files) {
-      if (files.hasOwnProperty(key)) {
-        len++;
+    var len = files.length;
 
-        fs.readFile(path.resolve(config.path, key), (function (file) {
-          return function (err, buf) {
-            if (err) {
-              reject(err.message);
-            }
-            else {
-              len--;
-              fileKeys[file] = getKey(file, md5(buf));
-              if (len <= 0) {
-                resolve(fileKeys);
-              }
-            }
+    for (var i = len - 1; i >= 0; i--) {
+      fs.readFile(path.resolve(config.webRoot, files[i]), (function (file) {
+        return function (err, data) {
+          if (err) {
+            reject(err.message);
           }
-        }(key)));
-      }
+          else {
+            fileKeys[file] = getKey(file, md5(data));
+            !(--len <= 0) || resolve(fileKeys);
+          }
+        }
+      }(files[i])));
     }
   });
 }
@@ -74,31 +68,29 @@ function upload(config, files) {
   });
 }
 function main(config, uploadFiles) {
-  var uploadedFiles;
-
+  var uploadedKeys;
 
   return new Promise(function (resolve, reject) {
-    function handleErr(message) {
-      reject('upload——>' + message);
-    }
-
-    Promise.all([unit.readUploaded(config.path), getFileKeys(config, uploadFiles)])
+    Promise.all([unit.readUploaded(config.webRoot), getFileKeys(config, uploadFiles)])
       .then(function (data) {
-        var needUploadFiles = {};
-        uploadedFiles = data[0];
-        uploadFiles = data[1];
+        var needUpload = {};
+        var uploadKeys = data[1];
 
-        for (var key in uploadFiles) {
-          if (uploadFiles.hasOwnProperty(key) && uploadFiles[key] !== uploadedFiles[key]) {
-            uploadedFiles[key] = needUploadFiles[key] = uploadFiles[key];
+        uploadedKeys = data[0];
+
+        for (var key in uploadKeys) {
+          if (uploadKeys.hasOwnProperty(key) && uploadKeys[key] !== uploadedKeys[key]) {
+            uploadedKeys[key] = needUpload[key] = uploadKeys[key];
           }
         }
 
-        return upload(config, needUploadFiles);
-      }, handleErr)
+        return upload(config, needUpload);
+      })
       .then(function () {
-        resolve(uploadedFiles);
-      }, handleErr);
+        resolve(uploadedKeys);
+      }, function (errorMessage) {
+        reject(errorMessage);
+      });
   });
 }
 
