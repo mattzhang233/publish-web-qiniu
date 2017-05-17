@@ -73,9 +73,8 @@ function upload(config, files) {
     }
   });
 }
-function main(config, data) {
-  var uploaded, needUpload;
-  var uploadFiles = data.uploadFiles;
+function main(config, uploadFiles) {
+  var uploadedFiles;
 
 
   return new Promise(function (resolve, reject) {
@@ -85,23 +84,20 @@ function main(config, data) {
 
     Promise.all([unit.readUploaded(config.path), getFileKeys(config, uploadFiles)])
       .then(function (data) {
+        var needUploadFiles = {};
+        uploadedFiles = data[0];
         uploadFiles = data[1];
-        needUpload = {};
-        uploaded = data[0];
 
         for (var key in uploadFiles) {
-          if (uploadFiles.hasOwnProperty(key) && uploaded[key] !== uploadFiles[key]) {
-            needUpload[key] = uploaded[key] = uploadFiles[key];
+          if (uploadFiles.hasOwnProperty(key) && uploadFiles[key] !== uploadedFiles[key]) {
+            uploadedFiles[key] = needUploadFiles[key] = uploadFiles[key];
           }
         }
 
-        return upload(config, needUpload);
+        return upload(config, needUploadFiles);
       }, handleErr)
       .then(function () {
-        resolve({
-          'uploaded': uploaded,
-          'needUpload': needUpload
-        });
+        resolve(uploadedFiles);
       }, handleErr);
   });
 }

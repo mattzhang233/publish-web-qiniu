@@ -6,14 +6,21 @@ var replace = require('./libs/replace')
 
 
 function plugin(config) {
+  var uploadFiles,replaceFiles;
+
   //处理配置
   config = Object.assign(defaultConfig, config);
   config.path = unit.handleWebDirectory(config.path);
 
   collect(config).then(function (data) {
-    return upload(config,data)
+    replaceFiles = data.replaceFiles;
+    uploadFiles = data.uploadFiles;
+
+    return upload(config,uploadFiles)
   }).then(function (data) {
-    return replace(data);
+    uploadFiles = data;
+
+    return replace(config,uploadFiles);
   },function (message) {
     unit.log(message,'error');
   }).then(function () {
