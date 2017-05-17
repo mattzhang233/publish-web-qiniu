@@ -1,8 +1,6 @@
 var colors = require('colors')
 var moment = require('moment')
-var isObject = require('is-object');
-var isArray = require('is-array');
-var isString = require('is-string');
+var path = require('path')
 
 
 colors.setTheme({
@@ -30,30 +28,15 @@ function log(message, type) {
   }
 }
 
-function handleSrc(src) {
-  var srcs = [];
-
-  if (isObject(src)) {
-    for (var key in src) {
-      if (src.hasOwnProperty(key)) {
-        srcs = srcs.concat(handleSrc(src[key]));
-      }
-    }
-  }
-  else if (isArray(src)) {
-    srcs = src;
-  }
-  else if (isString(src)) {
-    srcs = [src];
-  }
-  else {
-    log('config.uploadSrc 不是一个合法的参数', 'error');
-    process.exit(0);
-  }
-
-  return srcs;
+function handlePath(webPath) {
+  return path.resolve(webPath.toString());
 }
+function getRelativePath(webPath, relaticePath, nowPath) {
+  return path.relative(webPath, path.resolve(path.dirname(relaticePath), nowPath));
+}
+
 module.exports = {
   'log': log,
-  'handleSrc':handleSrc
+  'handlePath': handlePath,
+  'getRelativePath': getRelativePath
 };

@@ -1,7 +1,7 @@
 var vfs = require('vinyl-fs');
 var mapStream = require('map-stream');
 var Promise = require('promise')
-var path  = require('path');
+var unit = require('./unit')
 
 function main(config) {
   var uploadFiles = {};
@@ -9,7 +9,7 @@ function main(config) {
 
   return new Promise(function (resolve, reject) {
     vfs
-      .src(config.path, {
+      .src(config.path + '/**/*', {
         nodir: true
       })
       .pipe(mapStream(function (file, cb) {
@@ -18,9 +18,9 @@ function main(config) {
 
         while (config.uploadReg.exec(content) !== null) {
           hasUpload = true;
-          uploadFiles[path.resolve(path.dirname(file.path),RegExp.$1)] = path.extname(file.path);
+          uploadFiles[unit.getRelativePath(config.path, file.path, RegExp.$1)] = '';
         }
-        if(hasUpload){
+        if (hasUpload) {
           replaceFiles.push(file.path);
         }
 
@@ -28,8 +28,8 @@ function main(config) {
       }))
       .on('end', function () {
         resolve({
-          'uploadFiles':uploadFiles,
-          'replaceFiles':replaceFiles
+          'uploadFiles': uploadFiles,
+          'replaceFiles': replaceFiles
         });
       })
   });
