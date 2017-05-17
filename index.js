@@ -1,31 +1,30 @@
 var unit = require('./libs/unit');
-var defaultConfig = require('./libs/config');
+var conf = require('./libs/config');
 var collect = require('./libs/collect')
 var upload = require('./libs/upload')
 var replace = require('./libs/replace')
 
+function handleError(data) {
+  var errorModule = data[0];
+  var errorMessage = data[1];
 
+  unit.log(errorModule +' : '+ errorMessage, 'error');
+}
 function plugin(config) {
-  var uploadFiles,replaceFiles;
+  var uploadFiles, replaceFiles;
 
-  //处理配置
-  config = Object.assign(defaultConfig, config);
-  config.path = unit.handleWebDirectory(config.path);
-
-  collect(config).then(function (data) {
+  conf(config).then(collect).then(function (data) {
     replaceFiles = data.replaceFiles;
     uploadFiles = data.uploadFiles;
 
-    return upload(config,uploadFiles)
+    return upload(config, uploadFiles)
   }).then(function (data) {
     uploadFiles = data;
 
-    return replace(config,replaceFiles,uploadFiles);
-  },function (message) {
-    unit.log(message,'error');
+    return replace(config, replaceFiles, uploadFiles);
   }).then(function () {
     console.log(123123)
-  });
+  }, handleError);
 }
 plugin();
 module.exports = plugin;

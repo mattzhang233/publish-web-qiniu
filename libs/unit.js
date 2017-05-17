@@ -1,9 +1,9 @@
-var colors = require('colors')
-var moment = require('moment')
-var path = require('path')
-var Promise = require('promise')
-var fs = require('fs')
-var isObject = require('is-object')
+var colors = require('colors');
+var moment = require('moment');
+var path = require('path');
+var Promise = require('promise');
+var fs = require('fs');
+var isObject = require('is-object');
 
 
 colors.setTheme({
@@ -30,11 +30,8 @@ function log(message, type) {
     return moment().format('HH:mm:ss')
   }
 }
-function handleWebDirectory(directory) {
-  return path.resolve(directory.toString());
-}
-function getRelativePath(webPath, relaticePath, nowPath) {
-  return path.relative(webPath, path.resolve(path.dirname(relaticePath), nowPath));
+function getRelativePath(rootPath, relaticePath, nowPath) {
+  return path.relative(rootPath, path.resolve(path.dirname(relaticePath), nowPath));
 }
 
 function writeUploaded() {
@@ -67,7 +64,6 @@ function readUploaded(dir) {
 
 module.exports = {
   'log': log,
-  'handleWebDirectory': handleWebDirectory,
   'getRelativePath': getRelativePath,
   'writeUploaded': writeUploaded,
   'readUploaded': readUploaded

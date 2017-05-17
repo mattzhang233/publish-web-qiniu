@@ -1,24 +1,45 @@
 var vfs = require('vinyl-fs');
 var mapStream = require('map-stream');
-var Promise = require('promise')
-var unit = require('./unit')
+var Promise = require('promise');
+var unit = require('./unit');
+
+
+function arrayRemoveRepeat(arr) {
+  arr.sort();
+
+  for (var i = arr.length - 2; i >= 0; i--) {
+    if (arr[i + 1] === arr[i]) {
+      arr.splice(i, 1);
+    }
+  }
+
+  return arr;
+}
 
 function main(config) {
-  var uploadFiles = {};
+  var uploadFiles = [];
   var replaceFiles = [];
 
-  return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve) {
+    var path;
+    var hasUpload;
+    var content;
+
     vfs
-      .src(config.path + '/**/*', {
+      .src(config.webGlobs, {
         nodir: true
       })
       .pipe(mapStream(function (file, cb) {
-        var hasUpload;
-        var content = file.contents.toString();
+        hasUpload = false;
+        content = file.contents.toString();
 
         while (config.uploadReg.exec(content) !== null) {
-          hasUpload = true;
-          uploadFiles[unit.getRelativePath(config.path, file.path, RegExp.$1)] = '';
+          path = RegExp.$1;
+
+          if (path.indexOf(config.qiniuBucketDomain) === -1) {
+            hasUpload = true;
+            uploadFiles.push(unit.getRelativePath(config.webRoot, file.path, path));
+          }
         }
         if (hasUpload) {
           replaceFiles.push(file.path);
@@ -28,7 +49,7 @@ function main(config) {
       }))
       .on('end', function () {
         resolve({
-          'uploadFiles': uploadFiles,
+          'uploadFiles': arrayRemoveRepeat(uploadFiles),
           'replaceFiles': replaceFiles
         });
       })
