@@ -1,4 +1,23 @@
 {
+  "name": "publish-web-qiniu",
+  "version": "1.0.0",
+  "description": "上传web资源到七牛云并替换路径",
+  "main": "index.js",
+  "repository": "yujingwyh/publish-web-qiniu",
+  "keywords": [
+    "publish",
+    "web",
+    "publish web",
+    "qiniu"
+  ],
+  "author": {
+    "name": "yujingwyh",
+    "email": "yujingwyh@163.com"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "license": "MIT",
   "dependencies": {
     "colors": "^1.1.2",
     "is-object": "^1.0.1",
