@@ -20,7 +20,7 @@ function plugin(config) {
   }).then(function (data) {
     uploadFiles = data;
 
-    return replace(config,uploadFiles);
+    return replace(config,replaceFiles,uploadFiles);
   },function (message) {
     unit.log(message,'error');
   }).then(function () {

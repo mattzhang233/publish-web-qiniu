@@ -1,24 +1,35 @@
 var Promise = require('promise')
+var vfs = require('vinyl-fs')
+var unit = require('./unit')
+var through2 = require('through2')
 
-function writeLocalUpload(config, obj) {
-  var data = JSON.stringify(obj);
-
+function main(config, replaceFiles, uploadFiles) {
   return new Promise(function (resolve, reject) {
-    fs.writeFile(config.path + '/upload.json', data, function (err) {
-      err ? reject(err.message) : resolve();
-    });
-  });
-}
-function replace(resolve, reject, config, uploadFiles,webFiles) {
+    var relativePath;
 
-}
-function main(config,uploadFiles) {
-  return new Promise(function (resolve, reject) {
-    glob(config.upload, {
-      nodir: true
-    }, function (er, webFiles) {
-      er ? reject(er) : replace(resolve, reject, config, uploadFiles,webFiles);
-    });
+    vfs
+      .src('./web/**/*', {
+        nodir: true,
+        path: './'
+      })
+      .pipe(through2.obj(function (file, enc, cb) {
+        var content = file.contents.toString().replace(config.uploadReg, function (words, pattern) {
+          relativePath = unit.getRelativePath(config.path, file.path, pattern);
+
+          if (uploadFiles[relativePath]) {
+            return words.replace(pattern, uploadFiles[relativePath]);
+          }
+          else {
+            return words;
+          }
+        });
+
+        file.contents = new Buffer(content);
+        this.push(file);
+
+        cb();
+      }))
+      .pipe(vfs.dest(config.path));
   });
 }
 
