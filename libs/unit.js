@@ -34,7 +34,10 @@ function getRelativePath(rootPath, relaticePath, nowPath) {
   return path.relative(rootPath, path.resolve(path.dirname(relaticePath), nowPath));
 }
 function getUploadedPath(dir) {
-  return path.resolve(dir, './.publish-web-qiniu/uploaded.json');
+  dir = path.resolve(dir, './.publish-web-qiniu');
+  //fs.mkdir(dir);
+
+  return path.resolve(dir,'./uploaded.json');
 }
 function writeUploaded(dir, data) {
   var writeData = JSON.stringify(data);

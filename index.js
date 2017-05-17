@@ -22,7 +22,7 @@ function plugin(config) {
   }).then(function (data) {
     return replace(config, replaceFiles, data);
   }).then(function () {
-    console.log(123123)
+    console.log('完成')
   }, handleError);
 }
 plugin();

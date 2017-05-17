@@ -31,7 +31,7 @@ function main(config, replaceFiles, uploadFiles) {
       }))
       .pipe(vfs.dest(config.webRoot))
       .on('end', function () {
-        unit.writeUploaded(config.webRoot, uploadFiles);
+        unit.writeUploaded(config.webRoot, uploadFiles).then(resolve, reject);
       });
   });
 }
