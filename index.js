@@ -8,7 +8,7 @@ var replace = require('./libs/replace')
 function plugin(config) {
   //处理配置
   config = Object.assign(defaultConfig, config);
-  config.path = unit.handlePath(config.path);
+  config.path = unit.handleWebDirectory(config.path);
 
   collect(config).then(function (data) {
     return upload(config,data)

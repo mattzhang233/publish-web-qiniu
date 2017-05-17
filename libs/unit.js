@@ -1,6 +1,9 @@
 var colors = require('colors')
 var moment = require('moment')
 var path = require('path')
+var Promise = require('promise')
+var fs = require('fs')
+var isObject = require('is-object')
 
 
 colors.setTheme({
@@ -27,16 +30,45 @@ function log(message, type) {
     return moment().format('HH:mm:ss')
   }
 }
-
-function handlePath(webPath) {
-  return path.resolve(webPath.toString());
+function handleWebDirectory(directory) {
+  return path.resolve(directory.toString());
 }
 function getRelativePath(webPath, relaticePath, nowPath) {
   return path.relative(webPath, path.resolve(path.dirname(relaticePath), nowPath));
 }
 
+function writeUploaded() {
+
+}
+function readUploaded(dir) {
+  var uploadPath = path.resolve(dir, './.publish-web-qiniu/uploaded.json');
+  var Uploaded = {};
+
+  return new Promise(function (resolve, reject) {
+    fs.readFile(uploadPath, function (err, buf) {
+      var temp;
+      if (!err) {
+        try {
+          temp = JSON.parse(buf);
+
+          if (isObject(temp)) {
+            Uploaded = temp;
+          }
+        }
+        catch (e) {
+        }
+      }
+
+      resolve(Uploaded);
+    });
+  });
+}
+
+
 module.exports = {
   'log': log,
-  'handlePath': handlePath,
-  'getRelativePath': getRelativePath
+  'handleWebDirectory': handleWebDirectory,
+  'getRelativePath': getRelativePath,
+  'writeUploaded': writeUploaded,
+  'readUploaded': readUploaded
 };
