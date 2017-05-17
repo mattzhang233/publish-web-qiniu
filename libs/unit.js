@@ -33,16 +33,28 @@ function log(message, type) {
 function getRelativePath(rootPath, relaticePath, nowPath) {
   return path.relative(rootPath, path.resolve(path.dirname(relaticePath), nowPath));
 }
+function getUploadedPath(dir) {
+  return path.resolve(dir, './.publish-web-qiniu/uploaded.json');
+}
+function writeUploaded(dir, data) {
+  var writeData = JSON.stringify(data);
 
-function writeUploaded() {
-
+  return new Promise(function (resolve, reject) {
+    fs.writeFile(getUploadedPath(dir), writeData, function (err) {
+      if (err) {
+        reject(err.message);
+      }
+      else {
+        resolve();
+      }
+    });
+  });
 }
 function readUploaded(dir) {
-  var uploadPath = path.resolve(dir, './.publish-web-qiniu/uploaded.json');
   var uploaded = {};
 
   return new Promise(function (resolve, reject) {
-    fs.readFile(uploadPath, function (err, data) {
+    fs.readFile(getUploadedPath(dir), function (err, data) {
       var temp;
       if (!err) {
         try {

@@ -9,7 +9,7 @@ function handleError(errorMessage) {
   unit.log(errorMessage, 'error');
 }
 function plugin(config) {
-  var uploadKeys, replaceFiles;
+  var replaceFiles;
 
   conf(config).then(function (data) {
     config = data;
@@ -20,9 +20,7 @@ function plugin(config) {
 
     return upload(config, data.uploadFiles)
   }).then(function (data) {
-    uploadKeys = data;
-
-    return replace(config, replaceFiles, uploadKeys);
+    return replace(config, replaceFiles, data);
   }).then(function () {
     console.log(123123)
   }, handleError);

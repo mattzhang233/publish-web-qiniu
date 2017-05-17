@@ -49,7 +49,7 @@ function upload(config, files) {
         qiniu.io.putFile(
           (new qiniu.rs.PutPolicy(bucket + ":" + files[key])).token(),
           files[key],
-          path.resolve(config.path, key),
+          path.resolve(config.webRoot, key),
           new qiniu.io.PutExtra(),
           uploadfinishHandle
         );
@@ -68,29 +68,32 @@ function upload(config, files) {
   });
 }
 function main(config, uploadFiles) {
-  var uploadedKeys;
+  var uploadedFiles;
 
   return new Promise(function (resolve, reject) {
     Promise.all([unit.readUploaded(config.webRoot), getFileKeys(config, uploadFiles)])
       .then(function (data) {
+        var uploadPath;
         var needUpload = {};
         var uploadKeys = data[1];
+        var domain = config.qiniuBucketDomain;
 
-        uploadedKeys = data[0];
+        uploadedFiles = data[0];
 
         for (var key in uploadKeys) {
-          if (uploadKeys.hasOwnProperty(key) && uploadKeys[key] !== uploadedKeys[key]) {
-            uploadedKeys[key] = needUpload[key] = uploadKeys[key];
+          if (uploadKeys.hasOwnProperty(key)) {
+            uploadPath = domain + uploadKeys[key];
+            if (uploadPath !== uploadedFiles[key]) {
+              needUpload[key] = uploadKeys[key];
+              uploadedFiles[key] = uploadPath;
+            }
           }
         }
-
         return upload(config, needUpload);
       })
       .then(function () {
-        resolve(uploadedKeys);
-      }, function (errorMessage) {
-        reject(errorMessage);
-      });
+        resolve(uploadedFiles);
+      }, reject);
   });
 }
 
