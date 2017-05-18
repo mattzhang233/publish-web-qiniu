@@ -3,24 +3,29 @@ var conf = require('./libs/config');
 var collect = require('./libs/collect')
 var upload = require('./libs/upload')
 var replace = require('./libs/replace')
+var Pwqfiles = require('./libs/pwqfiles')
 
 function handleError(errorMessage) {
 
   unit.log(errorMessage, 'error');
 }
 function plugin(config) {
-  var replaceFiles;
+  var pwqfiles;
 
   conf(config).then(function (data) {
     config = data;
 
     return collect(config);
-  }).then(function (data) {
-    replaceFiles = data.replaceFiles;
+  }).then(function (files) {
+    pwqfiles = new Pwqfiles(files);
 
-    return upload(config, data.uploadFiles)
+    return pwqfiles.init(config);
+  }).then(function () {
+    return upload.filterAndRecord(config, pwqfiles);
+  }).then(function () {
+    return replace(config, pwqfiles);
   }).then(function (data) {
-    return replace(config, replaceFiles, data);
+    return upload.uploadToQiniu(config)
   }).then(function () {
     console.log('完成');
   }, handleError);

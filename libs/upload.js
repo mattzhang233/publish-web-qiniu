@@ -1,100 +1,89 @@
 var Promise = require('promise');
 var fs = require('fs');
-var md5 = require('md5');
-var qiniu = require('qiniu');
-var path = require('path');
 
+var qiniu = require('qiniu');
 var unit = require('./unit');
 
-function getFileKeys(config, files) {
-  var fileKeys = {};
-
-  function getKey(file, md5) {
-    var key = file.replace('\\', '-');
-
-    md5 = md5.substr(0, 8);
-    return key.indexOf('.') > -1 ? key.replace('.', '-' + md5 + '.') : key + '-' + md5;
-  }
-
-  return new Promise(function (resolve, reject) {
-    var len = files.length;
-
-    for (var i = len - 1; i >= 0; i--) {
-      fs.readFile(path.resolve(config.webRoot, files[i]), (function (file) {
-        return function (err, data) {
-          if (err) {
-            reject(err.message);
-          }
-          else {
-            fileKeys[file] = getKey(file, md5(data));
-            !(--len <= 0) || resolve(fileKeys);
-          }
-        }
-      }(files[i])));
-    }
-  });
-}
-function upload(config, files) {
+function uploadToQiniu(config) {
   //配置
   var bucket = config.qiniuBucket;
   qiniu.conf.ACCESS_KEY = config.qiniuAccess;
   qiniu.conf.SECRET_KEY = config.qiniuSecret;
 
-
   return new Promise(function (resolve, reject) {
-    var len = 0;
-    for (var key in files) {
-      if (files.hasOwnProperty(key)) {
-        len++;
-        qiniu.io.putFile(
-          (new qiniu.rs.PutPolicy(bucket + ":" + files[key])).token(),
-          files[key],
-          path.resolve(config.webRoot, key),
-          new qiniu.io.PutExtra(),
-          uploadfinishHandle
-        );
-      }
-    }
-    function uploadfinishHandle(err, ret) {
-      len--;
+    unit.readUpload(config.webRoot).then(function (uploadData) {
+      var len = 0;
+      var domain = config.qiniuBucketDomain;
+      var uploaded = uploadData.uploaded;
+      var waitUpload = uploadData.waitUpload;
 
-      if (err) {
-        reject(err.error);
-      }
-      else if (len <= 0) {
-        resolve();
-      }
-    }
-  });
-}
-function main(config, uploadFiles) {
-  var uploadedFiles;
+      for (var key in waitUpload) {
+        if (waitUpload.hasOwnProperty(key)) {
+          uploaded[key] = domain + waitUpload[key];
+          len++;
 
-  return new Promise(function (resolve, reject) {
-    Promise.all([unit.readUploaded(config.webRoot), getFileKeys(config, uploadFiles)])
-      .then(function (data) {
-        var uploadPath;
-        var needUpload = {};
-        var uploadKeys = data[1];
-        var domain = config.qiniuBucketDomain;
-
-        uploadedFiles = data[0];
-
-        for (var key in uploadKeys) {
-          if (uploadKeys.hasOwnProperty(key)) {
-            uploadPath = domain + uploadKeys[key];
-            if (uploadPath !== uploadedFiles[key]) {
-              needUpload[key] = uploadKeys[key];
-              uploadedFiles[key] = uploadPath;
-            }
-          }
+          qiniu.io.putFile(
+            (new qiniu.rs.PutPolicy(bucket + ":" + waitUpload[key])).token(),
+            waitUpload[key],
+            key,
+            new qiniu.io.PutExtra(),
+            uploadfinishHandle
+          );
         }
-        return upload(config, needUpload);
-      })
-      .then(function () {
-        resolve(uploadedFiles);
-      }, reject);
+      }
+      function uploadfinishHandle(err, ret) {
+        len--;
+
+        if (err) {
+          reject(err.error);
+        }
+        else if (len <= 0) {
+          unit.writeUpload(config.webRoot, {
+            uploaded: uploaded,
+            waitUpload: {}
+          }).then(resolve, reject);
+        }
+      }
+    }, reject);
   });
 }
 
-module.exports = main;
+function filterAndRecord(config, pwqfiles) {
+
+  function needUploadFiles() {
+    var file;
+    var files = {};
+
+    for (var i = pwqfiles.uploadFiles.length - 1; i >= 0; i--) {
+      file = pwqfiles.uploadFiles[i];
+
+      files[file] = pwqfiles.uploadKeys[file];
+    }
+
+    return files;
+  }
+
+  return new Promise(function (resolve, reject) {
+
+    unit.readUpload(config.webRoot).then(function (uploadData) {
+      var file, fileDomain;
+      var domain = config.qiniuBucketDomain;
+
+      for (var i = pwqfiles.uploadFiles.length - 1; i >= 0; i--) {
+        file = pwqfiles.uploadFiles[i];
+        fileDomain = domain + pwqfiles.uploadKeys[file];
+
+        if (fileDomain === uploadData.uploaded[file]) {
+          pwqfiles.uploadFiles.splice(i, 1);
+        }
+      }
+      unit.writeUpload(config.webRoot, {
+        waitUpload: needUploadFiles()
+      }).then(resolve, reject);
+    })
+  });
+}
+module.exports = {
+  'filterAndRecord': filterAndRecord,
+  'uploadToQiniu': uploadToQiniu
+}

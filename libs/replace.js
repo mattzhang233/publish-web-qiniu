@@ -1,27 +1,22 @@
 var Promise = require('promise');
 var vfs = require('vinyl-fs');
 var through2 = require('through2');
+var unit = require('./unit')
 
-var unit = require('./unit');
-
-function main(config, replaceFiles, uploadFiles) {
+function main(config, pwqfiles) {
   return new Promise(function (resolve, reject) {
-    var relativePath;
+    var path;
+    var domain = config.qiniuBucketDomain;
 
     vfs
-      .src(replaceFiles, {
+      .src(pwqfiles.replaceFiles, {
         nodir: true
       })
       .pipe(through2.obj(function (file, enc, cb) {
         var content = file.contents.toString().replace(config.uploadReg, function (words, pattern) {
-          relativePath = unit.getRelativePath(config.webRoot, file.path, pattern);
+          var path = unit.handleFilesPath(config.webRoot, file.path, pattern);
 
-          if (uploadFiles[relativePath]) {
-            return words.replace(pattern, uploadFiles[relativePath]);
-          }
-          else {
-            return words;
-          }
+          return pwqfiles.uploadKeys[path] ? words.replace(pattern, domain + pwqfiles.uploadKeys[path]) : words;
         });
 
         file.contents = new Buffer(content);
@@ -30,9 +25,7 @@ function main(config, replaceFiles, uploadFiles) {
         cb();
       }))
       .pipe(vfs.dest(config.webRoot))
-      .on('end', function () {
-        unit.writeUploaded(config.webRoot, uploadFiles).then(resolve, reject);
-      });
+      .on('end', resolve);
   });
 }
 

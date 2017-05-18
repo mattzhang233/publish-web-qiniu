@@ -26,9 +26,14 @@ function main(config) {
     }
 
     domain = config.qiniuBucketDomain;
-    config.qiniuBucketDomain = domain.lastIndexOf('/') === domain.length - 1 ? domain : domain + '/';
+    if(domain.indexOf('//') === -1){
+      reject('config.qiniuBucketDomain must have protocol');
+    }
+    else{
+      config.qiniuBucketDomain = domain.lastIndexOf('/') === domain.length - 1 ? domain : domain + '/';
 
-    resolve(config);
+      resolve(config);
+    }
   });
 }
 

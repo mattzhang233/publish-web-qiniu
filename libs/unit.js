@@ -30,47 +30,62 @@ function log(message, type) {
     return moment().format('HH:mm:ss')
   }
 }
-function getRelativePath(rootPath, relaticePath, nowPath) {
-  return path.relative(rootPath, path.resolve(path.dirname(relaticePath), nowPath));
+function handleFilesPath(rootPath, relaticePath, nowPath) {
+  var firstString = nowPath.substr(0, 1);
+
+  if (firstString === '#' || nowPath.indexOf('//') > -1 || nowPath.indexOf(':') > -1) {
+    return '';
+  }
+  if (firstString !== '.' && firstString !== '/') {
+    nowPath = './' + nowPath;
+  }
+  if (nowPath.indexOf('?') !== -1) {
+    nowPath = nowPath.substr(0, nowPath.indexOf('?'))
+  }
+  return firstString === '/' ?
+    path.resolve(rootPath, '.' + nowPath) :
+    path.resolve(path.dirname(relaticePath), nowPath);
 }
-function getUploadedPath(dir) {
+
+function getUploadDir(dir) {
   dir = path.resolve(dir, './.publish-web-qiniu');
-  //fs.mkdir(dir);
 
-  return path.resolve(dir,'./uploaded.json');
+  fs.mkdir(dir, function (err) {
+
+  });
+
+  return dir;
 }
-function writeUploaded(dir, data) {
-  var writeData = JSON.stringify(data);
-
+function writeUpload(dir, data) {
   return new Promise(function (resolve, reject) {
-    fs.writeFile(getUploadedPath(dir), writeData, function (err) {
-      if (err) {
-        reject(err.message);
-      }
-      else {
-        resolve();
-      }
-    });
+    readUpload(dir).then(function (uploadData) {
+      fs.writeFile(path.resolve(getUploadDir(dir), './upload.json'), JSON.stringify(Object.assign(uploadData, data)), function (err) {
+        err ? reject(err.message) : resolve();
+      });
+    }, reject);
   });
 }
-function readUploaded(dir) {
-  var uploaded = {};
+function readUpload(dir) {
+  var readData = {
+    uploaded: {},
+    waitUpload: {}
+  }
 
   return new Promise(function (resolve, reject) {
-    fs.readFile(getUploadedPath(dir), function (err, data) {
+    fs.readFile(path.resolve(getUploadDir(dir), './upload.json'), function (err, data) {
       var temp;
       if (!err) {
         try {
           temp = JSON.parse(data);
 
           if (isObject(temp)) {
-            uploaded = temp;
+            Object.assign(readData, temp);
           }
         }
         catch (e) {
         }
       }
-      resolve(uploaded);
+      resolve(readData);
     });
   });
 }
@@ -78,7 +93,7 @@ function readUploaded(dir) {
 
 module.exports = {
   'log': log,
-  'getRelativePath': getRelativePath,
-  'writeUploaded': writeUploaded,
-  'readUploaded': readUploaded
+  'handleFilesPath': handleFilesPath,
+  'writeUpload': writeUpload,
+  'readUpload': readUpload
 };
