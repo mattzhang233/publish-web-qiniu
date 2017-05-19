@@ -1,7 +1,7 @@
 {
   "name": "publish-web-qiniu",
-  "version": "1.1.0",
-  "description": "上传web资源到七牛云并替换路径",
+  "version": "1.2.0",
+  "description": "通过正则匹配需要上传的文件后上传到七牛云并替换路径",
   "main": "index.js",
   "repository": "yujingwyh/publish-web-qiniu",
   "keywords": [
@@ -24,10 +24,12 @@
     "map-stream": "^0.0.7",
     "md5": "^2.2.1",
     "moment": "^2.18.1",
+    "ora": "^1.2.0",
     "path": "^0.12.7",
     "promise": "^7.1.1",
     "qiniu": "^6.1.13",
     "through2": "^2.0.3",
+    "trim": "^0.0.1",
     "vinyl-fs": "^2.4.4"
   }
 }
