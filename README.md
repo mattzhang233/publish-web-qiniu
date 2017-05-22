@@ -63,14 +63,14 @@ Default: `false`
 Type: `string`<br>
 Default: `./.publish-web-qiniu`
 
-用于写入已上传文件的相对于option.webRoot目录
+用于写入已上传文件的相对于options.webRoot目录
 
 ##### onCollectPath
 
 Type: `function`<br>
 Default: `null`
 
-在在收集路径是回调，传入参数（匹配到的文件路径，所在文件，本应该返回的路径），返回处理后的匹配文件路径，如果是空字符串则不处理该匹配
+在收集路径是回调，传入参数（匹配到的文件路径，所在文件，本应该返回的路径），返回处理后的匹配文件路径，如果是空字符串则不处理该匹配
 
 ##### onFinish
 
