@@ -1,6 +1,6 @@
 {
   "name": "publish-web-qiniu",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "通过正则匹配需要上传的文件后上传到七牛云并替换路径",
   "main": "index.js",
   "repository": "yujingwyh/publish-web-qiniu",

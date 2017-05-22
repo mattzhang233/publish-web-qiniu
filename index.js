@@ -27,24 +27,7 @@ function plugin(config) {
 
     return pwqfiles.init(config);
   }).then(function () {
-    return new Promise(function (resolve, reject) {
-      var cbData;
-
-      if (config.onCollected) {
-        cbData = config.onCollected(pwqfiles);
-
-        if (cbData && cbData.then) {
-          cbData.then(function (argPwqfiles) {
-            pwqfiles = argPwqfiles;
-
-            upload.filterAndRecord(config, pwqfiles).then(resolve, reject);
-          }, reject);
-          return;
-        }
-        pwqfiles = cbData;
-      }
-      upload.filterAndRecord(config, pwqfiles).then(resolve, reject);
-    });
+    return upload.filterAndRecord(config, pwqfiles);
   }).then(function () {
     spinner.stop();
     unit.log('collect finish');

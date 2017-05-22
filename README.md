@@ -49,7 +49,7 @@ Default: `null`
 Type: `regexp`<br>
 Default: `/(?:href=|src=|url\()['|"]([^\s>"']+?)['|"]/gi`
 
-上传查找规则
+上传查找规则，文件路径为模式中的第一个子表达式匹配的字符串
 
 ##### uploadedDelete
 
@@ -58,12 +58,19 @@ Default: `false`
 
 上传完成后是否需要删除该文件
 
-##### onCollected
+##### systemDir
+
+Type: `string`<br>
+Default: `./.publish-web-qiniu`
+
+用于写入已上传文件的相对于option.webRoot目录
+
+##### onCollectPath
 
 Type: `function`<br>
 Default: `null`
 
-在收集完成后回调，传入参数为pwqfiles，返回pwqfiles或者promise（resolve的数据为pwqfiles）
+在在收集路径是回调，传入参数（匹配到的文件路径，所在文件，本应该返回的路径），返回处理后的匹配文件路径，如果是空字符串则不处理该匹配
 
 ##### onFinish
 
